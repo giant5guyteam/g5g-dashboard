@@ -124,7 +124,7 @@ select.os.ob { background: rgba(255,149,0,0.12); color: #cc7700; border-color: r
 <div class="tasks" id="taskList"></div>
 <div class="legend">
   💡 <strong>Tip:</strong> Use the dropdowns on each row to update <strong>Status</strong>, <strong>Priority</strong>, and <strong>Owner</strong>.
-  Changes save automatically this browser. Tap a task title to see full details.
+  Changes save automatically to this browser. Tap a task title to see full details.
 </div>
 
 <div class="save-banner" id="saveBanner">
@@ -132,9 +132,270 @@ select.os.ob { background: rgba(255,149,0,0.12); color: #cc7700; border-color: r
 </div>
 
 <script>
-const DEFAULT_TASKS = [];
+// ── DEFAULT TASK DATA ────────────────────────────────────────────────────────
+const DEFAULT_TASKS = [
+  { id:1,  owner:"Chad",  category:"Finance & Invoices", priority:"HIGH", status:"Done",
+    title:"Pay Deschutes Plumbing Invoice #14983",
+    detail:"PAID $599.50 on Jun 8, 2026. Receipt confirmed via Jobber. Jerod Ross adjusted invoice from $919 with warranty discount. Closed.",
+    contact:"Jerod Ross — service@deschutesplumbing.com | 541-385-6060",
+    due:"Done — Paid Jun 8", link:"https://secure.getjobber.com/client_hubs/c9785e2b-1d4c-487a-b1eb-cc1c30877ea3/invoices/157755495" },
+
+  { id:2,  owner:"Chad",  category:"Finance & Invoices", priority:"HIGH", status:"Waiting",
+    title:"StorageMart Claim — Unit 309 (Water/Mold Damage)",
+    detail:"Chad disputed $322.96 settlement offer. Demanded lease docs, policy exclusions, inspection reports before accepting. Waiting on Chris Polson's response. Do NOT accept current offer without reviewing docs.",
+    contact:"Chris Polson — Chris.Polson@storage-mart.com | (573) 493-3293",
+    due:"Awaiting response", link:null },
+
+  { id:3,  owner:"Chad",  category:"Finance & Invoices", priority:"MED", status:"Waiting",
+    title:"CJ Legacy Accounting — Clarify $3,350 Bill",
+    detail:"Questioned Jarin at MGG LLP why CJ Legacy (2 properties only) has a $3,350 tax return fee. Awaiting explanation before paying.",
+    contact:"Jarin Maurer — jarin@mggllp.com",
+    due:"Awaiting response", link:null },
+
+  { id:4,  owner:"Maria", category:"Finance & Invoices", priority:"MED", status:"Waiting",
+    title:"Alker Family Electric — Confirm Receipt of $6,572.40",
+    detail:"Payment confirmed sent Jun 7. Maria to follow up to ensure received and close out.",
+    contact:"Renorthwest@gmail.com", due:"Confirm receipt", link:null },
+
+  { id:5,  owner:"Maria", category:"Finance & Invoices", priority:"MED", status:"Waiting",
+    title:"Cambria Jacobson — Confirm Final Payment Receipt",
+    detail:"Zelle $3,333.32 sent Jun 7 (Final Invoice 5). Maria to confirm Cambria received and contract termination is fully closed.",
+    contact:"contactcambria@gmail.com", due:"Confirm receipt", link:null },
+
+  { id:6,  owner:"Chad",  category:"Finance & Invoices", priority:"LOW", status:"To Do",
+    title:"Submit Coaches Conference Expenses",
+    detail:"Reminder from Stefanie (Strategic Coach) to submit reimbursement for hotel Jun 3–4 (2 nights) + conference fees. JW Marriott Grande Lakes folio received Jun 8.",
+    contact:"Stefanie Radia-Bramwell — stefanie.radia-bramwell@strategiccoach.com",
+    due:"ASAP", link:null },
+
+  { id:7,  owner:"Maria", category:"Camp Dwight", priority:"HIGH", status:"To Do",
+    title:"Get T-Shirt Quote from Universitees",
+    detail:"Chad sent art and tasked Maria to get quote from Universitees for Camp Dwight 5K Family Fun Run shirts. Use same numbers as last time.",
+    contact:"Maria — maria@giant5guy.com", due:"ASAP", link:null },
+
+  { id:8,  owner:"Chad",  category:"Camp Dwight", priority:"HIGH", status:"In Progress",
+    title:"BTL Liners — Arrange Pickup of Donated Slip-N-Slide Material",
+    detail:"BTL confirmed donation of slip-n-slide liner (market value $2,562.00). Travis says Chad must pick up in person. Action: (1) provide billing info to Travis, (2) schedule pickup. Maria preparing donation receipt for Fortified Family LLC.",
+    contact:"Travis — travis@btlliners.com", due:"Action needed", link:null },
+
+  { id:9,  owner:"Maria", category:"Camp Dwight", priority:"HIGH", status:"To Do",
+    title:"Coordinate Camp Work Party #1 — June 27",
+    detail:"Todd confirmed interest. Work party Sat June 27. Maria to confirm details, directions, task list, and communicate to all volunteers.",
+    contact:"Todd — chatgptodd@gmail.com", due:"June 27", link:null },
+
+  { id:10, owner:"Maria", category:"Camp Dwight", priority:"MED", status:"To Do",
+    title:"Camp Work Party #2 — July (date TBD)",
+    detail:"Second work party planned for a Saturday in July. Maria to set the date, confirm with Chad, and communicate to volunteers.",
+    contact:"Todd + other volunteers", due:"July (TBD)", link:null },
+
+  { id:18, owner:"Maria", category:"Camp Dwight", priority:"MED", status:"In Progress",
+    title:"Prepare BTL Liners Donation Receipt (Fortified Family LLC)",
+    detail:"Chad forwarded BTL donation email to Maria Jun 8: prepare a Donation Receipt from Fortified Family LLC to BTL Liners for $2,562.00. Draft, then send to Chad for approval before sending.",
+    contact:"Travis — travis@btlliners.com | Chad — chad@giant5guy.com",
+    due:"ASAP", link:null },
+
+  { id:11, owner:"Both",  category:"Giant 5 Guy", priority:"HIGH", status:"In Progress",
+    title:"Set Up Project Management System",
+    detail:"Chad emailed Maria Jun 7: 'We need a system for project management.' Maria to advise on best tool and implement. Chad to approve and adopt.",
+    contact:"Maria — maria@giant5guy.com", due:"ASAP", link:null },
+
+  { id:12, owner:"Maria", category:"Giant 5 Guy", priority:"MED", status:"In Progress",
+    title:"Process 5 Win Wednesday (5WW 060326)",
+    detail:"Chad sent 5WW content to Maria + Jenise on Jun 3 for processing/publishing. Maria to confirm published.",
+    contact:"Maria + Jenise — jenisecheri@gmail.com", due:"In process", link:null },
+
+  { id:13, owner:"Chad",  category:"Giant 5 Guy", priority:"MED", status:"In Progress",
+    title:"Giant 5 Foundations Zoom Session",
+    detail:"Zoom invite sent Jun 4 to 13 participants (sons, family, community). Confirm recordings/notes captured.",
+    contact:"Multiple family/community members",
+    due:"Ongoing", link:"https://us02web.zoom.us/j/89064021725" },
+
+  { id:19, owner:"Chad",  category:"Giant 5 Guy", priority:"MED", status:"To Do",
+    title:"Reply to Focus on the Family — Reschedule Interview",
+    detail:"Claire Gannage (FOTF) emailed Jun 8: Sep 2 no longer available. Alternates: Aug 31, Sep 1, 3, or 4. Reply with preferred date. CC Cynthia Murphy and Ashley Bazer.",
+    contact:"Claire Gannage — Claire.Gannage@fotf.org | Cynthia Murphy — Cynthia.Murphy@fotf.org",
+    due:"Reply this week", link:null },
+
+  { id:14, owner:"Chad",  category:"Giant 5 Guy", priority:"LOW", status:"Done",
+    title:"Endorsement for Seeds of Hope (Azure Standard)",
+    detail:"Chad provided endorsement for David Stelzer's book. Pete Strayer at Azure Standard received it. Completed Jun 2.",
+    contact:"pete.strayer@azurestandard.com | david@azurestandard.com",
+    due:"Done", link:null },
+
+  { id:15, owner:"Maria", category:"Giant 5 Guy", priority:"LOW", status:"To Do",
+    title:"GoDaddy Renewal — Review and Confirm",
+    detail:"GoDaddy auto-renewed order #4107741701 on Jun 8. Maria to review receipt and confirm domains/services renewed are correct.",
+    contact:"GoDaddy — donotreply@godaddy.com", due:"Review this week", link:null },
+
+  { id:16, owner:"Maria", category:"Property & Legal", priority:"MED", status:"Done",
+    title:"MOV Camp Waiver — Signed and Filed",
+    detail:"Camp waiver signed by Wade Spencer Johnson via SabalSign. Completed Jun 7. Maria to file signed copy for records.",
+    contact:"wade.johnson@exprealty.com", due:"Done — file it", link:null },
+
+  { id:17, owner:"Chad",  category:"Admin & Operations", priority:"MED", status:"To Do",
+    title:"Low Bank Balance — BofA Checking (x9125)",
+    detail:"BofA alert Jun 8: available balance dropped below $100 in Chadwick Baylor Checking. Review and fund account.",
+    contact:"Bank of America", due:"Today", link:null }
+];
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────────────
 const STORAGE_KEY = "g5g_tasks_v1";
-let tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
+let tasks = (() => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge: keep saved fields, add any new tasks from defaults
+      const savedIds = new Set(parsed.map(t => t.id));
+      const merged = [...parsed];
+      DEFAULT_TASKS.forEach(dt => { if (!savedIds.has(dt.id)) merged.push(dt); });
+      return merged;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_TASKS));
+})();
+
+let saveTimer = null;
+function persistTasks() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch(e) {}
+  clearTimeout(saveTimer);
+  const b = document.getElementById("saveBanner");
+  b.classList.add("show");
+  saveTimer = setTimeout(() => b.classList.remove("show"), 2000);
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const CATS = ["All","Finance & Invoices","Camp Dwight","Giant 5 Guy","Property & Legal","Admin & Operations"];
+const STATUSES = ["All","To Do","In Progress","Waiting","Done"];
+const OWNERS_F = ["All","Chad","Maria","Both"];
+
+let fCat = "All", fStatus = "All", fOwner = "All", expanded = null;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const pcolor = { HIGH:"#ff3b30", MED:"#ff9500", LOW:"#34c759" };
+const pcls   = { HIGH:"ph", MED:"pm", LOW:"pl" };
+const scls   = { "To Do":"s0", "In Progress":"s1", "Waiting":"s2", "Done":"s3" };
+const ocls   = { Chad:"oc", Maria:"om", Both:"ob" };
+const ocolor = { Chad:"#af52de", Maria:"#ff2d55", Both:"#cc7700" };
+
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  renderHeader();
+  renderFilters();
+  renderTasks();
+}
+
+function renderHeader() {
+  const done    = tasks.filter(t => t.status === "Done").length;
+  const total   = tasks.length;
+  const high    = tasks.filter(t => t.priority === "HIGH" && t.status !== "Done").length;
+  const waiting = tasks.filter(t => t.status === "Waiting").length;
+  const cOpen   = tasks.filter(t => (t.owner==="Chad"||t.owner==="Both") && t.status!=="Done").length;
+  const mOpen   = tasks.filter(t => (t.owner==="Maria"||t.owner==="Both") && t.status!=="Done").length;
+  const pct     = Math.round((done/total)*100);
+
+  document.getElementById("statCards").innerHTML = `
+    <div class="stat-card"><div class="val" style="color:#c8c8e0">${total}</div><div class="lbl">Total</div></div>
+    <div class="stat-card"><div class="val" style="color:#ff6b6b">${high}</div><div class="lbl">🔴 High</div></div>
+    <div class="stat-card"><div class="val" style="color:#ffb347">${waiting}</div><div class="lbl">Waiting</div></div>
+    <div class="stat-card"><div class="val" style="color:#34c759">${done}</div><div class="lbl">Done</div></div>
+    <div class="owner-card">
+      <div class="owner-lbl">Open by Owner</div>
+      <div class="owner-row">
+        <div class="owner-stat">
+          <div class="avatar" style="background:rgba(175,82,222,0.15);border:1.5px solid rgba(175,82,222,0.35);color:#af52de">C</div>
+          <div class="owner-count" style="color:#af52de">${cOpen}</div>
+          <div class="owner-name">Chad</div>
+        </div>
+        <div class="owner-stat">
+          <div class="avatar" style="background:rgba(255,45,85,0.15);border:1.5px solid rgba(255,45,85,0.35);color:#ff2d55">M</div>
+          <div class="owner-count" style="color:#ff2d55">${mOpen}</div>
+          <div class="owner-name">Maria</div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressLbl").textContent = `${done} of ${total} resolved · ${pct}% complete`;
+}
+
+function renderFilters() {
+  document.getElementById("catFilters").innerHTML = CATS.map(c =>
+    `<button class="fbtn${fCat===c?" fc":""}" onclick="setF('cat','${esc(c)}')">${esc(c)}</button>`
+  ).join("");
+
+  const oac = {All:"fo-all",Chad:"fo-chad",Maria:"fo-maria",Both:"fo-both"};
+  document.getElementById("ownerFilters").innerHTML = OWNERS_F.map(o =>
+    `<button class="fbtn${fOwner===o?" "+oac[o]:""}" onclick="setF('owner','${o}')">${o}</button>`
+  ).join("");
+
+  document.getElementById("statusFilters").innerHTML = STATUSES.map(s =>
+    `<button class="fbtn${fStatus===s?" fs":""}" onclick="setF('status','${esc(s)}')">${esc(s)}</button>`
+  ).join("");
+}
+
+function renderTasks() {
+  const list = tasks.filter(t =>
+    (fCat==="All"    || t.category===fCat)   &&
+    (fOwner==="All"  || t.owner===fOwner)     &&
+    (fStatus==="All" || t.status===fStatus)
+  );
+
+  const el = document.getElementById("taskList");
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;color:#8e8e93;font-family:sans-serif;padding:40px;font-size:13px">No items match these filters.</div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(t => {
+    const done = t.status === "Done";
+    const isEx = expanded === t.id;
+    const over = t.due && (t.due.toLowerCase().includes("overdue") || t.due === "Today");
+
+    const statOpts = ["To Do","In Progress","Waiting","Done"].map(s =>
+      `<option value="${s}"${t.status===s?" selected":""}>${s}</option>`).join("");
+    const priOpts = ["HIGH","MED","LOW"].map(p =>
+      `<option value="${p}"${t.priority===p?" selected":""}>${p}</option>`).join("");
+    const ownOpts = ["Chad","Maria","Both"].map(o =>
+      `<option value="${o}"${t.owner===o?" selected":""}>${o}</option>`).join("");
+
+    return `<div class="task-card${done?" done":""}">
+      <div class="task-row">
+        <div class="pdot" style="background:${pcolor[t.priority]};box-shadow:0 0 5px ${pcolor[t.priority]}55"></div>
+        <div class="ttitle${done?" done-t":""}" onclick="toggleEx(${t.id})">${esc(t.title)}</div>
+        ${t.due?`<div class="tdue${over?" over":""}">${esc(t.due)}</div>`:""}
+        <select class="ss ${scls[t.status]}" onclick="event.stopPropagation()" onchange="update(${t.id},'status',this.value)">${statOpts}</select>
+        <select class="ps ${pcls[t.priority]}" onclick="event.stopPropagation()" onchange="update(${t.id},'priority',this.value)">${priOpts}</select>
+        <select class="os ${ocls[t.owner]}" onclick="event.stopPropagation()" onchange="update(${t.id},'owner',this.value)">${ownOpts}</select>
+        <div class="arrow" onclick="toggleEx(${t.id})">${isEx?"▲":"▼"}</div>
+      </div>
+      ${isEx?`<div class="task-detail">
+        <p>${esc(t.detail)}</p>
+        ${t.contact?`<div class="task-contact">📬 <strong>Contact:</strong> ${esc(t.contact)}</div>`:""}
+        ${t.link?`<a class="task-link" href="${esc(t.link)}" target="_blank">🔗 Open link →</a>`:""}
+      </div>`:""}
+    </div>`;
+  }).join("");
+}
+
+function setF(type, val) {
+  if (type==="cat")    fCat=val;
+  else if(type==="owner")   fOwner=val;
+  else                 fStatus=val;
+  render();
+}
+
+function toggleEx(id) {
+  expanded = (expanded===id) ? null : id;
+  render();
+}
+
+function update(id, field, value) {
+  const t = tasks.find(t=>t.id===id);
+  if (t) { t[field]=value; persistTasks(); render(); }
+}
+
 render();
 </script>
 </body>
