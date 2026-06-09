@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giant 5 Guy — Command Center</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, "Times New Roman", serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; -webkit-text-size-adjust: 100%; }
+
+/* HEADER */
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #f5f5f7; padding: 20px 20px 14px; }
+.header-label { font-size: 10px; letter-spacing: 0.2em; color: #7a7a9a; text-transform: uppercase; font-family: sans-serif; margin-bottom: 3px; }
+.header-title { font-size: 24px; font-weight: normal; color: #f0f0f8; }
+.header-sub { color: #7a7a9a; font-size: 11px; margin-top: 3px; font-family: sans-serif; }
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+
+.stat-cards { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
+.stat-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 7px 12px; text-align: center; min-width: 54px; }
+.stat-card .val { font-size: 19px; font-weight: bold; font-family: sans-serif; }
+.stat-card .lbl { font-size: 9px; color: #7a7a9a; font-family: sans-serif; margin-top: 1px; }
+.owner-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 7px 12px; }
+.owner-lbl { font-size: 9px; color: #7a7a9a; font-family: sans-serif; margin-bottom: 5px; }
+.owner-row { display: flex; gap: 10px; }
+.owner-stat { text-align: center; }
+.avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; font-family: sans-serif; margin: 0 auto 2px; }
+.owner-count { font-size: 15px; font-weight: bold; font-family: sans-serif; }
+.owner-name { font-size: 9px; color: #7a7a9a; font-family: sans-serif; }
+
+.progress-wrap { margin-top: 14px; background: rgba(255,255,255,0.08); border-radius: 4px; height: 4px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #34c759, #30d158); border-radius: 4px; transition: width 0.4s; }
+.progress-lbl { font-size: 10px; color: #7a7a9a; font-family: sans-serif; margin-top: 4px; }
+
+/* FILTERS */
+.filters { padding: 10px 16px; background: #fff; border-bottom: 1px solid #e5e5e7; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+.filter-group { display: flex; gap: 4px; flex-wrap: wrap; }
+.filter-divider { width: 1px; background: #e5e5e7; margin: 0 3px; align-self: stretch; }
+.fbtn { padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 11px; font-family: sans-serif; border: 1px solid #d1d1d6; background: transparent; color: #666; transition: all 0.12s; white-space: nowrap; }
+.fbtn:active { opacity: 0.7; }
+.fc { border-color: rgba(0,122,255,0.5); background: rgba(0,122,255,0.1); color: #007aff; }
+.fo-chad { border-color: rgba(175,82,222,0.5); background: rgba(175,82,222,0.1); color: #af52de; }
+.fo-maria { border-color: rgba(255,45,85,0.5); background: rgba(255,45,85,0.1); color: #ff2d55; }
+.fo-both { border-color: rgba(255,149,0,0.5); background: rgba(255,149,0,0.1); color: #ff9500; }
+.fo-all { border-color: #999; background: rgba(0,0,0,0.05); color: #333; }
+.fs { border-color: rgba(0,122,255,0.4); background: rgba(0,122,255,0.08); color: #007aff; }
+
+/* TASKS */
+.tasks { padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+.task-card { background: #fff; border: 1px solid #e5e5e7; border-radius: 12px; overflow: visible; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.15s; }
+.task-card.done { background: #f9fdf9; border-color: #c8f0d0; }
+.task-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.09); }
+
+.task-row { display: flex; align-items: center; gap: 7px; padding: 11px 12px; }
+.pdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ttitle { flex: 1; font-size: 14px; color: #1d1d1f; cursor: pointer; min-width: 0; line-height: 1.3; }
+.ttitle.done-t { text-decoration: line-through; color: #8e8e93; }
+.tdue { font-size: 10px; color: #8e8e93; font-family: sans-serif; white-space: nowrap; flex-shrink: 0; }
+.tdue.over { color: #ff3b30; font-weight: bold; }
+
+/* Dropdowns */
+select { cursor: pointer; outline: none; font-family: sans-serif; font-weight: 500; -webkit-appearance: none; appearance: none; border: 1px solid transparent; border-radius: 6px; font-size: 11px; padding: 4px 7px; }
+select.ss { }
+select.ss.s0 { background: rgba(142,142,147,0.12); color: #636366; border-color: rgba(142,142,147,0.3); }
+select.ss.s1 { background: rgba(0,122,255,0.1); color: #007aff; border-color: rgba(0,122,255,0.3); }
+select.ss.s2 { background: rgba(255,149,0,0.1); color: #cc7700; border-color: rgba(255,149,0,0.3); }
+select.ss.s3 { background: rgba(52,199,89,0.1); color: #28a745; border-color: rgba(52,199,89,0.3); }
+select.ps { width: 52px; text-align: center; font-size: 10px; font-weight: bold; }
+select.ps.ph { background: #ff3b30; color: #fff; border-color: #ff3b30; }
+select.ps.pm { background: #ff9500; color: #fff; border-color: #ff9500; }
+select.ps.pl { background: #34c759; color: #fff; border-color: #34c759; }
+select.os { border-radius: 20px; padding: 4px 8px; }
+select.os.oc { background: rgba(175,82,222,0.12); color: #af52de; border-color: rgba(175,82,222,0.3); }
+select.os.om { background: rgba(255,45,85,0.12); color: #ff2d55; border-color: rgba(255,45,85,0.3); }
+select.os.ob { background: rgba(255,149,0,0.12); color: #cc7700; border-color: rgba(255,149,0,0.3); }
+
+.arrow { color: #bbb; font-size: 12px; flex-shrink: 0; cursor: pointer; padding: 0 2px; }
+
+/* EXPANDED */
+.task-detail { padding: 10px 12px 12px 27px; border-top: 1px solid #f0f0f5; }
+.task-detail p { font-size: 13px; color: #444; line-height: 1.6; font-family: sans-serif; margin-bottom: 7px; }
+.task-contact { font-size: 11px; color: #888; font-family: sans-serif; }
+.task-link { font-size: 11px; color: #007aff; font-family: sans-serif; text-decoration: none; display: inline-block; margin-top: 5px; }
+
+/* SAVE BANNER */
+.save-banner { position: fixed; bottom: 16px; right: 16px; background: #1a1a2e; color: #fff; font-family: sans-serif; font-size: 12px; padding: 9px 16px; border-radius: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); display: none; align-items: center; gap: 8px; z-index: 100; }
+.save-banner.show { display: flex; }
+.save-btn { background: #34c759; color: #fff; border: none; border-radius: 12px; padding: 5px 12px; font-family: sans-serif; font-size: 11px; cursor: pointer; font-weight: bold; }
+
+/* LEGEND */
+.legend { margin: 0 16px 24px; padding: 10px 14px; background: #fff; border-radius: 10px; border: 1px solid #e5e5e7; font-size: 11px; color: #8e8e93; font-family: sans-serif; line-height: 1.9; }
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .header-top { flex-direction: column; }
+  .task-row { flex-wrap: nowrap; overflow-x: auto; gap: 5px; }
+  select { font-size: 10px; padding: 3px 5px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-label">GIANT 5 GUY</div>
+      <div class="header-title">Command Center</div>
+      <div class="header-sub" id="headerSub">Daily refresh · Jun 9, 2026</div>
+    </div>
+    <div class="stat-cards" id="statCards"></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-lbl" id="progressLbl"></div>
+</div>
+
+<div class="filters">
+  <div class="filter-group" id="catFilters"></div>
+  <div class="filter-divider"></div>
+  <div class="filter-group" id="ownerFilters"></div>
+  <div class="filter-divider"></div>
+  <div class="filter-group" id="statusFilters"></div>
+</div>
+
+<div class="tasks" id="taskList"></div>
+<div class="legend">
+  💡 <strong>Tip:</strong> Use the dropdowns on each row to update <strong>Status</strong>, <strong>Priority</strong>, and <strong>Owner</strong>.
+  Changes save automatically to this browser. Tap a task title to see full details.
+</div>
+
+<div class="save-banner" id="saveBanner">
+  ✓ Changes saved
+</div>
+
+<script>
+// ── DEFAULT TASK DATA ────────────────────────────────────────────────────────
+const DEFAULT_TASKS = [
+  { id:1,  owner:"Chad",  category:"Finance & Invoices", priority:"HIGH", status:"Done",
+    title:"Pay Deschutes Plumbing Invoice #14983",
+    detail:"PAID $599.50 on Jun 8, 2026. Receipt confirmed via Jobber. Jerod Ross adjusted invoice from $919 with warranty discount. Closed.",
+    contact:"Jerod Ross — service@deschutesplumbing.com | 541-385-6060",
+    due:"Done — Paid Jun 8", link:"https://secure.getjobber.com/client_hubs/c9785e2b-1d4c-487a-b1eb-cc1c30877ea3/invoices/157755495" },
+
+  { id:2,  owner:"Chad",  category:"Finance & Invoices", priority:"HIGH", status:"Waiting",
+    title:"StorageMart Claim — Unit 309 (Water/Mold Damage)",
+    detail:"Chad disputed $322.96 settlement offer. Demanded lease docs, policy exclusions, inspection reports before accepting. Waiting on Chris Polson's response. Do NOT accept current offer without reviewing docs.",
+    contact:"Chris Polson — Chris.Polson@storage-mart.com | (573) 493-3293",
+    due:"Awaiting response", link:null },
+
+  { id:3,  owner:"Chad",  category:"Finance & Invoices", priority:"MED", status:"Waiting",
+    title:"CJ Legacy Accounting — Clarify $3,350 Bill",
+    detail:"Questioned Jarin at MGG LLP why CJ Legacy (2 properties only) has a $3,350 tax return fee. Awaiting explanation before paying.",
+    contact:"Jarin Maurer — jarin@mggllp.com",
+    due:"Awaiting response", link:null },
+
+  { id:4,  owner:"Maria", category:"Finance & Invoices", priority:"MED", status:"Waiting",
+    title:"Alker Family Electric — Confirm Receipt of $6,572.40",
+    detail:"Payment confirmed sent Jun 7. Maria to follow up to ensure received and close out.",
+    contact:"Renorthwest@gmail.com", due:"Confirm receipt", link:null },
+
+  { id:5,  owner:"Maria", category:"Finance & Invoices", priority:"MED", status:"Waiting",
+    title:"Cambria Jacobson — Confirm Final Payment Receipt",
+    detail:"Zelle $3,333.32 sent Jun 7 (Final Invoice 5). Maria to confirm Cambria received and contract termination is fully closed.",
+    contact:"contactcambria@gmail.com", due:"Confirm receipt", link:null },
+
+  { id:6,  owner:"Chad",  category:"Finance & Invoices", priority:"LOW", status:"To Do",
+    title:"Submit Coaches Conference Expenses",
+    detail:"Reminder from Stefanie (Strategic Coach) to submit reimbursement for hotel Jun 3–4 (2 nights) + conference fees. JW Marriott Grande Lakes folio received Jun 8.",
+    contact:"Stefanie Radia-Bramwell — stefanie.radia-bramwell@strategiccoach.com",
+    due:"ASAP", link:null },
+
+  { id:7,  owner:"Maria", category:"Camp Dwight", priority:"HIGH", status:"To Do",
+    title:"Get T-Shirt Quote from Universitees",
+    detail:"Chad sent art and tasked Maria to get quote from Universitees for Camp Dwight 5K Family Fun Run shirts. Use same numbers as last time.",
+    contact:"Maria — maria@giant5guy.com", due:"ASAP", link:null },
+
+  { id:8,  owner:"Chad",  category:"Camp Dwight", priority:"HIGH", status:"In Progress",
+    title:"BTL Liners — Arrange Pickup of Donated Slip-N-Slide Material",
+    detail:"BTL confirmed donation of slip-n-slide liner (market value $2,562.00). Travis says Chad must pick up in person. Action: (1) provide billing info to Travis, (2) schedule pickup. Maria preparing donation receipt for Fortified Family LLC.",
+    contact:"Travis — travis@btlliners.com", due:"Action needed", link:null },
+
+  { id:9,  owner:"Maria", category:"Camp Dwight", priority:"HIGH", status:"To Do",
+    title:"Coordinate Camp Work Party #1 — June 27",
+    detail:"Todd confirmed interest. Work party Sat June 27. Maria to confirm details, directions, task list, and communicate to all volunteers.",
+    contact:"Todd — chatgptodd@gmail.com", due:"June 27", link:null },
+
+  { id:10, owner:"Maria", category:"Camp Dwight", priority:"MED", status:"To Do",
+    title:"Camp Work Party #2 — July (date TBD)",
+    detail:"Second work party planned for a Saturday in July. Maria to set the date, confirm with Chad, and communicate to volunteers.",
+    contact:"Todd + other volunteers", due:"July (TBD)", link:null },
+
+  { id:18, owner:"Maria", category:"Camp Dwight", priority:"MED", status:"In Progress",
+    title:"Prepare BTL Liners Donation Receipt (Fortified Family LLC)",
+    detail:"Chad forwarded BTL donation email to Maria Jun 8: prepare a Donation Receipt from Fortified Family LLC to BTL Liners for $2,562.00. Draft, then send to Chad for approval before sending.",
+    contact:"Travis — travis@btlliners.com | Chad — chad@giant5guy.com",
+    due:"ASAP", link:null },
+
+  { id:11, owner:"Both",  category:"Giant 5 Guy", priority:"HIGH", status:"In Progress",
+    title:"Set Up Project Management System",
+    detail:"Chad emailed Maria Jun 7: 'We need a system for project management.' Maria to advise on best tool and implement. Chad to approve and adopt.",
+    contact:"Maria — maria@giant5guy.com", due:"ASAP", link:null },
+
+  { id:12, owner:"Maria", category:"Giant 5 Guy", priority:"MED", status:"In Progress",
+    title:"Process 5 Win Wednesday (5WW 060326)",
+    detail:"Chad sent 5WW content to Maria + Jenise on Jun 3 for processing/publishing. Maria to confirm published.",
+    contact:"Maria + Jenise — jenisecheri@gmail.com", due:"In process", link:null },
+
+  { id:13, owner:"Chad",  category:"Giant 5 Guy", priority:"MED", status:"In Progress",
+    title:"Giant 5 Foundations Zoom Session",
+    detail:"Zoom invite sent Jun 4 to 13 participants (sons, family, community). Confirm recordings/notes captured.",
+    contact:"Multiple family/community members",
+    due:"Ongoing", link:"https://us02web.zoom.us/j/89064021725" },
+
+  { id:19, owner:"Chad",  category:"Giant 5 Guy", priority:"MED", status:"To Do",
+    title:"Reply to Focus on the Family — Reschedule Interview",
+    detail:"Claire Gannage (FOTF) emailed Jun 8: Sep 2 no longer available. Alternates: Aug 31, Sep 1, 3, or 4. Reply with preferred date. CC Cynthia Murphy and Ashley Bazer.",
+    contact:"Claire Gannage — Claire.Gannage@fotf.org | Cynthia Murphy — Cynthia.Murphy@fotf.org",
+    due:"Reply this week", link:null },
+
+  { id:14, owner:"Chad",  category:"Giant 5 Guy", priority:"LOW", status:"Done",
+    title:"Endorsement for Seeds of Hope (Azure Standard)",
+    detail:"Chad provided endorsement for David Stelzer's book. Pete Strayer at Azure Standard received it. Completed Jun 2.",
+    contact:"pete.strayer@azurestandard.com | david@azurestandard.com",
+    due:"Done", link:null },
+
+  { id:15, owner:"Maria", category:"Giant 5 Guy", priority:"LOW", status:"To Do",
+    title:"GoDaddy Renewal — Review and Confirm",
+    detail:"GoDaddy auto-renewed order #4107741701 on Jun 8. Maria to review receipt and confirm domains/services renewed are correct.",
+    contact:"GoDaddy — donotreply@godaddy.com", due:"Review this week", link:null },
+
+  { id:16, owner:"Maria", category:"Property & Legal", priority:"MED", status:"Done",
+    title:"MOV Camp Waiver — Signed and Filed",
+    detail:"Camp waiver signed by Wade Spencer Johnson via SabalSign. Completed Jun 7. Maria to file signed copy for records.",
+    contact:"wade.johnson@exprealty.com", due:"Done — file it", link:null },
+
+  { id:17, owner:"Chad",  category:"Admin & Operations", priority:"MED", status:"To Do",
+    title:"Low Bank Balance — BofA Checking (x9125)",
+    detail:"BofA alert Jun 8: available balance dropped below $100 in Chadwick Baylor Checking. Review and fund account.",
+    contact:"Bank of America", due:"Today", link:null }
+];
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────────────
+const STORAGE_KEY = "g5g_tasks_v1";
+let tasks = (() => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge: keep saved fields, add any new tasks from defaults
+      const savedIds = new Set(parsed.map(t => t.id));
+      const merged = [...parsed];
+      DEFAULT_TASKS.forEach(dt => { if (!savedIds.has(dt.id)) merged.push(dt); });
+      return merged;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_TASKS));
+})();
+
+let saveTimer = null;
+function persistTasks() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch(e) {}
+  clearTimeout(saveTimer);
+  const b = document.getElementById("saveBanner");
+  b.classList.add("show");
+  saveTimer = setTimeout(() => b.classList.remove("show"), 2000);
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const CATS = ["All","Finance & Invoices","Camp Dwight","Giant 5 Guy","Property & Legal","Admin & Operations"];
+const STATUSES = ["All","To Do","In Progress","Waiting","Done"];
+const OWNERS_F = ["All","Chad","Maria","Both"];
+
+let fCat = "All", fStatus = "All", fOwner = "All", expanded = null;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const pcolor = { HIGH:"#ff3b30", MED:"#ff9500", LOW:"#34c759" };
+const pcls   = { HIGH:"ph", MED:"pm", LOW:"pl" };
+const scls   = { "To Do":"s0", "In Progress":"s1", "Waiting":"s2", "Done":"s3" };
+const ocls   = { Chad:"oc", Maria:"om", Both:"ob" };
+const ocolor = { Chad:"#af52de", Maria:"#ff2d55", Both:"#cc7700" };
+
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  renderHeader();
+  renderFilters();
+  renderTasks();
+}
+
+function renderHeader() {
+  const done    = tasks.filter(t => t.status === "Done").length;
+  const total   = tasks.length;
+  const high    = tasks.filter(t => t.priority === "HIGH" && t.status !== "Done").length;
+  const waiting = tasks.filter(t => t.status === "Waiting").length;
+  const cOpen   = tasks.filter(t => (t.owner==="Chad"||t.owner==="Both") && t.status!=="Done").length;
+  const mOpen   = tasks.filter(t => (t.owner==="Maria"||t.owner==="Both") && t.status!=="Done").length;
+  const pct     = Math.round((done/total)*100);
+
+  document.getElementById("statCards").innerHTML = `
+    <div class="stat-card"><div class="val" style="color:#c8c8e0">${total}</div><div class="lbl">Total</div></div>
+    <div class="stat-card"><div class="val" style="color:#ff6b6b">${high}</div><div class="lbl">🔴 High</div></div>
+    <div class="stat-card"><div class="val" style="color:#ffb347">${waiting}</div><div class="lbl">Waiting</div></div>
+    <div class="stat-card"><div class="val" style="color:#34c759">${done}</div><div class="lbl">Done</div></div>
+    <div class="owner-card">
+      <div class="owner-lbl">Open by Owner</div>
+      <div class="owner-row">
+        <div class="owner-stat">
+          <div class="avatar" style="background:rgba(175,82,222,0.15);border:1.5px solid rgba(175,82,222,0.35);color:#af52de">C</div>
+          <div class="owner-count" style="color:#af52de">${cOpen}</div>
+          <div class="owner-name">Chad</div>
+        </div>
+        <div class="owner-stat">
+          <div class="avatar" style="background:rgba(255,45,85,0.15);border:1.5px solid rgba(255,45,85,0.35);color:#ff2d55">M</div>
+          <div class="owner-count" style="color:#ff2d55">${mOpen}</div>
+          <div class="owner-name">Maria</div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressLbl").textContent = `${done} of ${total} resolved · ${pct}% complete`;
+}
+
+function renderFilters() {
+  document.getElementById("catFilters").innerHTML = CATS.map(c =>
+    `<button class="fbtn${fCat===c?" fc":""}" onclick="setF('cat','${esc(c)}')">${esc(c)}</button>`
+  ).join("");
+
+  const oac = {All:"fo-all",Chad:"fo-chad",Maria:"fo-maria",Both:"fo-both"};
+  document.getElementById("ownerFilters").innerHTML = OWNERS_F.map(o =>
+    `<button class="fbtn${fOwner===o?" "+oac[o]:""}" onclick="setF('owner','${o}')">${o}</button>`
+  ).join("");
+
+  document.getElementById("statusFilters").innerHTML = STATUSES.map(s =>
+    `<button class="fbtn${fStatus===s?" fs":""}" onclick="setF('status','${esc(s)}')">${esc(s)}</button>`
+  ).join("");
+}
+
+function renderTasks() {
+  const list = tasks.filter(t =>
+    (fCat==="All"    || t.category===fCat)   &&
+    (fOwner==="All"  || t.owner===fOwner)     &&
+    (fStatus==="All" || t.status===fStatus)
+  );
+
+  const el = document.getElementById("taskList");
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;color:#8e8e93;font-family:sans-serif;padding:40px;font-size:13px">No items match these filters.</div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(t => {
+    const done = t.status === "Done";
+    const isEx = expanded === t.id;
+    const over = t.due && (t.due.toLowerCase().includes("overdue") || t.due === "Today");
+
+    const statOpts = ["To Do","In Progress","Waiting","Done"].map(s =>
+      `<option value="${s}"${t.status===s?" selected":""}>${s}</option>`).join("");
+    const priOpts = ["HIGH","MED","LOW"].map(p =>
+      `<option value="${p}"${t.priority===p?" selected":""}>${p}</option>`).join("");
+    const ownOpts = ["Chad","Maria","Both"].map(o =>
+      `<option value="${o}"${t.owner===o?" selected":""}>${o}</option>`).join("");
+
+    return `<div class="task-card${done?" done":""}">
+      <div class="task-row">
+        <div class="pdot" style="background:${pcolor[t.priority]};box-shadow:0 0 5px ${pcolor[t.priority]}55"></div>
+        <div class="ttitle${done?" done-t":""}" onclick="toggleEx(${t.id})">${esc(t.title)}</div>
+        ${t.due?`<div class="tdue${over?" over":""}">${esc(t.due)}</div>`:""}
+        <select class="ss ${scls[t.status]}" onclick="event.stopPropagation()" onchange="update(${t.id},'status',this.value)">${statOpts}</select>
+        <select class="ps ${pcls[t.priority]}" onclick="event.stopPropagation()" onchange="update(${t.id},'priority',this.value)">${priOpts}</select>
+        <select class="os ${ocls[t.owner]}" onclick="event.stopPropagation()" onchange="update(${t.id},'owner',this.value)">${ownOpts}</select>
+        <div class="arrow" onclick="toggleEx(${t.id})">${isEx?"▲":"▼"}</div>
+      </div>
+      ${isEx?`<div class="task-detail">
+        <p>${esc(t.detail)}</p>
+        ${t.contact?`<div class="task-contact">📬 <strong>Contact:</strong> ${esc(t.contact)}</div>`:""}
+        ${t.link?`<a class="task-link" href="${esc(t.link)}" target="_blank">🔗 Open link →</a>`:""}
+      </div>`:""}
+    </div>`;
+  }).join("");
+}
+
+function setF(type, val) {
+  if (type==="cat")    fCat=val;
+  else if(type==="owner")   fOwner=val;
+  else                 fStatus=val;
+  render();
+}
+
+function toggleEx(id) {
+  expanded = (expanded===id) ? null : id;
+  render();
+}
+
+function update(id, field, value) {
+  const t = tasks.find(t=>t.id===id);
+  if (t) { t[field]=value; persistTasks(); render(); }
+}
+
+render();
+</script>
+</body>
+</html>
